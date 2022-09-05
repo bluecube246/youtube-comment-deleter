@@ -119,7 +119,8 @@ class JointProcessor(object):
 processors = {
     "atis": JointProcessor,
     "snips": JointProcessor,
-    "kor_hate": JointProcessor
+    "kor_hate": JointProcessor,
+    "youtube": JointProcessor
 }
 
 

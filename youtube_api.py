@@ -40,27 +40,33 @@ class youtube_api:
 
         self.youtube = build("youtube", "v3", credentials=credentials)
 
-    def get_comments(self, videoId):
+    def get_comments(self, videoId, get_all=False, max_results=20):
         request = self.youtube.commentThreads().list(
         part="id,replies,snippet",
         order="relevance",
         videoId=videoId,
+        maxResults=max_results
         #pageToken="QURTSl9pMGFOUl9pUjQyYmpfMzNiUnhWQlJzbXZxaVF0SlY4TDZHZjRZVUJnZ1BlLXgyYnJaS2poeFRRamcyUmttaDAzYnhIdldlckZ6MnVScUlheV9EQnBBQkNnc19sSXc1OVlpY2FLOTdRM0xtMFlpWmRiSXV0NC1FY3hMYUNmUHF3M21aVFNZcG9KcXFQZlZRMXF4b042YnROVVA0c0Z0bEZZM21zQk1Ta1MtWjFNNkZ6Xy11ZlRwY2NPMTFrU1Jsa2JvNTVLSzlXTjg1eDI0cW8xU01uNWVlYkowWXIxYS0tT1BMbFJGaU9jS1puRDdkNFhFRHpyd3pBZjhla0xvd0ZsYUx2MEdpYkFsYjI0QnZQZ2RjVkVpYl80Um5RdkVKVEEtMEV0U3lRUXFvOUgtWnhKcFB1Slp4dmJDampyUjAyS3RCRmRVdw=="
         )
 
         response = request.execute()
 
         comment_dict = {}
+        comment_replies_dict = {}
 
         for comment in response['items']:
             comment_dict[comment['snippet']['topLevelComment']['id']] = comment['snippet']['topLevelComment']['snippet']['textDisplay']
+            if comment.get('replies', False):
+                for replies in comment['replies']['comments']:
+                    comment_replies_dict[replies['id']] = replies['snippet']['textDisplay']
 
-        while response.get('nextPageToken', None):
+        while response.get('nextPageToken', None) and get_all:
             request = self.youtube.commentThreads().list(
                 part="id,replies,snippet",
                 order="relevance",
                 videoId=videoId,
-                pageToken=response['nextPageToken']
+                pageToken=response['nextPageToken'],
+                maxResults=max_results
             )
 
             response = request.execute()
@@ -70,7 +76,7 @@ class youtube_api:
                 comment['snippet']['topLevelComment']['snippet']['textDisplay']
 
         #print(json.dumps(response))
-        return comment_dict
+        return comment_dict, comment_replies_dict
 
     def get_playlist_video(self):
         request = self.youtube.playlistItems().list(
@@ -105,3 +111,18 @@ class youtube_api:
             moderationStatus="rejected"
         )
         request.execute()
+
+    def get_video_ids(self, Id, max_results):
+        request = self.youtube.search().list(
+            part="id, snippet",
+            maxResults=max_results,
+            channelId=Id,
+            order="date"
+        ).execute()
+
+        video_id = []
+
+        for video in request['items']:
+            video_id.append(video['id']['videoId'])
+
+        return video_id

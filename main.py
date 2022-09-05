@@ -25,10 +25,6 @@ def main(args):
         trainer.load_model()
         trainer.evaluate("test")
 
-    if args.do_infer:
-        trainer.evaluate("infer")
-
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
@@ -45,7 +41,7 @@ if __name__ == '__main__':
     parser.add_argument("--eval_batch_size", default=64, type=int, help="Batch size for evaluation.")
     parser.add_argument("--max_seq_len", default=50, type=int, help="The maximum total input sequence length after tokenization.")
     parser.add_argument("--learning_rate", default=5e-5, type=float, help="The initial learning rate for Adam.")
-    parser.add_argument("--num_train_epochs", default=10.0, type=float, help="Total number of training epochs to perform.")
+    parser.add_argument("--num_train_epochs", default=25.0, type=float, help="Total number of training epochs to perform.")
     parser.add_argument("--weight_decay", default=0.0, type=float, help="Weight decay if we apply some.")
     parser.add_argument('--gradient_accumulation_steps', type=int, default=1,
                         help="Number of updates steps to accumulate before performing a backward/update pass.")
@@ -73,12 +69,11 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    args.task = 'kor_hate'
-    args.model_dir = 'kor_hate_model'
-    args.model_type = 'kobert'
-    args.do_train = False
+    args.task = 'youtube'
+    args.model_dir = 'youtube_model'
+    #args.model_type = 'kobert'
+    args.do_train = True
     args.do_eval = True
-    args.do_infer = False
 
     args.model_name_or_path = MODEL_PATH_MAP[args.model_type]
     main(args)
